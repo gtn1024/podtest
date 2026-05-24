@@ -13,7 +13,7 @@ PodTest provides a clean API to manage Docker/Podman containers in your test sui
 - **Wait strategies**: TCP port, log pattern, composite
 - **Resource interface**: `try-with` auto-cleanup
 - **Test suite lifecycle** management with `PodTestSuite`
-- **Database modules**: PostgreSQL (more coming soon)
+- **Database modules**: PostgreSQL, MySQL
 
 ## Quick Start
 
@@ -37,6 +37,7 @@ For database modules:
 [dependencies]
   podtest_core = "0.1.0"
   podtest_postgresql = "0.1.0"
+  podtest_mysql = "0.1.0"
 ```
 
 ### Basic Usage
@@ -94,6 +95,31 @@ func testWithPostgres() {
     // postgresql://myuser:mypass@localhost:PORT/mydb
 
     pg.stop()
+}
+```
+
+### MySQL
+
+```cangjie
+package mytest
+
+import std.unittest.*
+import std.unittest.testmacro.*
+import podtest_mysql.*
+
+@Test
+func testWithMysql() {
+    let mysql = MysqlContainer(
+        username: "myuser",
+        password: "mypass",
+        database: "mydb"
+    )
+    mysql.start()
+
+    let connStr = mysql.connectionString()
+    // mysql://myuser:mypass@localhost:PORT/mydb
+
+    mysql.stop()
 }
 ```
 

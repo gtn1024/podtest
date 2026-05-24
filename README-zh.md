@@ -13,7 +13,7 @@ PodTest 提供简洁的 API 来管理测试套件中的 Docker/Podman 容器 —
 - **等待策略**：TCP 端口、日志模式、组合策略
 - **Resource 接口**：`try-with` 自动清理
 - **测试套件生命周期** 管理（`PodTestSuite`）
-- **数据库模块**：PostgreSQL（更多模块开发中）
+- **数据库模块**：PostgreSQL、MySQL
 
 ## 快速开始
 
@@ -37,6 +37,7 @@ PodTest 提供简洁的 API 来管理测试套件中的 Docker/Podman 容器 —
 [dependencies]
   podtest_core = "0.1.0"
   podtest_postgresql = "0.1.0"
+  podtest_mysql = "0.1.0"
 ```
 
 ### 基本用法
@@ -94,6 +95,31 @@ func testWithPostgres() {
     // postgresql://myuser:mypass@localhost:PORT/mydb
 
     pg.stop()
+}
+```
+
+### MySQL
+
+```cangjie
+package mytest
+
+import std.unittest.*
+import std.unittest.testmacro.*
+import podtest_mysql.*
+
+@Test
+func testWithMysql() {
+    let mysql = MysqlContainer(
+        username: "myuser",
+        password: "mypass",
+        database: "mydb"
+    )
+    mysql.start()
+
+    let connStr = mysql.connectionString()
+    // mysql://myuser:mypass@localhost:PORT/mydb
+
+    mysql.stop()
 }
 ```
 
