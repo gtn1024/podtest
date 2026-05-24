@@ -1,0 +1,25 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Zxilly/setup-cangjie@v2
+        with:
+          channel: sts
+          version: 1.1.0
+
+      - name: verify docker
+        run: docker version
+
+      - name: build
+        shell: bash
+        run: cjpm build
+
+      - name: test
+        shell: bash
+        run: cjpm test

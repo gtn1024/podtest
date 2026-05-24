@@ -1,0 +1,18 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "podtest_core"
+  description = "Containerized testing library for Cangjie - core module"
+  version = "0.1.0"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = ""
+  output-type = "static"
+  src-dir = "src"
+  target-dir = ""
+  package-configuration = {}
+
+  authors = ["gtn1024"]
+  repository = "https://github.com/gtn1024/podtest"
+  homepage = "https://github.com/gtn1024/podtest"
+  license = ["Apache-2.0"]
+  tag = ["testing", "docker", "container", "podman"]
