@@ -15,3 +15,5 @@ reports/
 # Misc
 tmp*
 .DS_Store
+
+build-script-cache/

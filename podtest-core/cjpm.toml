@@ -5,7 +5,7 @@
   version = "0.1.0"
   compile-option = ""
   override-compile-option = ""
-  link-option = ""
+  link-option = "-lstdx.encoding.jsonFFI"
   output-type = "static"
   src-dir = "src"
   target-dir = ""
@@ -16,3 +16,6 @@
   homepage = "https://github.com/gtn1024/podtest"
   license = ["Apache-2.0"]
   tag = ["testing", "docker", "container", "podman"]
+
+[dependencies]
+  stdx = { git = "https://github.com/gtn1024/cangjie_stdx", tag = "v1.1.0-fix" }

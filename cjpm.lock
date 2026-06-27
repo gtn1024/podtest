@@ -1,3 +1,4 @@
 version = 0
 
 [requires]
+  stdx = {git = "https://github.com/gtn1024/cangjie_stdx", commitId = "b968d2d644f36424020ba20ca8cd3c7945604e14", tag = "v1.1.0-fix"}
