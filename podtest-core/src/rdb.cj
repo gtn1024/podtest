@@ -10,3 +10,7 @@ public interface RdbContainer <: PresetContainer {
 
     func connectionString(): String
 }
+
+public interface RdbInitSqlContainer<T> <: RdbContainer {
+    func withInitSql(sql: String): T
+}

@@ -1,17 +1,20 @@
 package podtest_mysql
 
-import std.core.Duration
+import std.core.{Duration, sleep}
 import std.collection.ArrayList
 import std.convert.Parsable
+import std.time.DateTime
 import podtest_core.*
 
-public class MysqlContainer <: RdbContainer {
+public class MysqlContainer <: RdbInitSqlContainer<MysqlContainer> {
     private let _image: String
     private let _username: String
     private let _password: String
     private let _database: String
     private let _startupTimeout: Duration
     private let container: GenericContainer
+    private let initSqls: ArrayList<String>
+    private var initSqlExecuted: Bool = false
 
     public init(
         image!: String = "docker.io/library/mysql:9.7",
@@ -25,6 +28,7 @@ public class MysqlContainer <: RdbContainer {
         this._password = password
         this._database = database
         this._startupTimeout = startupTimeout
+        this.initSqls = ArrayList<String>()
 
         let waitStrategies = ArrayList<WaitStrategy>()
         waitStrategies.add(TcpWait(port: "3306", timeout: Duration.second * 5))
@@ -43,12 +47,33 @@ public class MysqlContainer <: RdbContainer {
             .withStartupTimeout(startupTimeout)
     }
 
+    public func withInitSql(sql: String): This {
+        if (container.isStarted) {
+            throw PodTestException(PodTestError.ConfigError("init SQL must be configured before container start"))
+        }
+        if (sql.trimAscii().isEmpty()) {
+            throw PodTestException(PodTestError.ConfigError("init SQL cannot be empty"))
+        }
+        initSqls.add(sql)
+        return this
+    }
+
     public func start(): Unit {
+        if (container.isStarted) {
+            return
+        }
         container.start()
+        try {
+            runInitSqls()
+        } catch (e: PodTestException) {
+            container.stop()
+            throw e
+        }
     }
 
     public func stop(): Unit {
         container.stop()
+        initSqlExecuted = false
     }
 
     public prop host: String {
@@ -103,6 +128,69 @@ public class MysqlContainer <: RdbContainer {
     }
 
     public override func close(): Unit {
-        container.stop()
+        stop()
+    }
+
+    private func runInitSqls(): Unit {
+        if (initSqlExecuted) {
+            return
+        }
+        if (initSqls.size == 0) {
+            initSqlExecuted = true
+            return
+        }
+
+        waitUntilSqlReady()
+
+        for (sql in initSqls) {
+            let result = execSql(sql)
+            if (!result.success) {
+                throw PodTestException(PodTestError.InitSqlFailed(initSqlFailureMessage("MySQL", result)))
+            }
+        }
+
+        initSqlExecuted = true
+    }
+
+    private func waitUntilSqlReady(): Unit {
+        let start = DateTime.now()
+        var detail = "no output"
+        while (DateTime.now() - start < _startupTimeout) {
+            let result = execSql("SELECT 1;")
+            if (result.success) {
+                return
+            }
+            detail = execSqlOutput(result)
+            sleep(Duration.second)
+        }
+
+        throw PodTestException(
+            PodTestError.WaitTimeout("MySQL init SQL connection not ready after ${_startupTimeout}: ${detail}"))
+    }
+
+    private func execSql(sql: String): ExecResult {
+        // MYSQL_USER is not guaranteed to authenticate over the local socket; root is the reliable init account.
+        container.exec(
+            [
+                "mysql",
+                "-uroot",
+                "-p${_password}",
+                _database,
+                "-e",
+                sql
+            ]
+        )
+    }
+
+    private func initSqlFailureMessage(databaseName: String, result: ExecResult): String {
+        return "${databaseName} init SQL failed with exit code ${result.exitCode}: ${execSqlOutput(result)}"
+    }
+
+    private func execSqlOutput(result: ExecResult): String {
+        var detail = (result.stdout + result.stderr).trimAscii()
+        if (detail.isEmpty()) {
+            detail = "no output"
+        }
+        return detail
     }
 }

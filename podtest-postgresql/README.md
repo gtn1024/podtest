@@ -28,6 +28,8 @@ func testWithPostgres() {
         password: "mypass",
         database: "mydb"
     )
+        .withInitSql("CREATE TABLE items (id INT PRIMARY KEY, name TEXT NOT NULL);")
+        .withInitSql("INSERT INTO items (id, name) VALUES (1, 'seed');")
     pg.start()
 
     let connStr = pg.connectionString()
@@ -61,6 +63,14 @@ Properties:
 | `database` | `String` | Database name |
 | `isStarted` | `Bool` | Whether container is running |
 | `connectionString()` | `String` | Full connection URL |
+
+Methods:
+
+| Method | Description |
+|--------|-------------|
+| `withInitSql(sql)` | Queue an inline SQL statement before `start()` |
+
+Init SQL statements run in order after the PostgreSQL client can connect. A failing statement aborts `start()` with `InitSqlFailed` and cleans up the container.
 
 ### Wait Strategy
 

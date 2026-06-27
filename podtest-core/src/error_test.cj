@@ -16,6 +16,12 @@ func testPodTestErrorCliError() {
 }
 
 @Test
+func testPodTestErrorInitSqlFailed() {
+    let err = PodTestError.InitSqlFailed("statement failed")
+    @Expect(err.toString() == "InitSqlFailed: statement failed")
+}
+
+@Test
 func testPodTestExceptionConstruction() {
     let err = PodTestError.WaitTimeout("timeout after 30s")
     let ex = PodTestException(err)
