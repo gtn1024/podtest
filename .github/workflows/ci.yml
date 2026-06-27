@@ -4,7 +4,13 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: test (${{ matrix.engine }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [docker, podman]
     steps:
       - uses: actions/checkout@v4
 
@@ -14,7 +20,23 @@ jobs:
           version: 1.1.0
 
       - name: verify docker
+        if: matrix.engine == 'docker'
         run: docker version
+
+      - name: install podman
+        if: matrix.engine == 'podman'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: verify podman
+        if: matrix.engine == 'podman'
+        shell: bash
+        run: |
+          podman version
+          podman info
+          podman run --rm docker.io/library/alpine:latest true
 
       - name: build
         shell: bash
@@ -22,4 +44,6 @@ jobs:
 
       - name: test
         shell: bash
-        run: cjpm test
+        env:
+          PODTEST_ENGINE: ${{ matrix.engine }}
+        run: cjpm test --no-progress --no-color --timeout-each=120s
