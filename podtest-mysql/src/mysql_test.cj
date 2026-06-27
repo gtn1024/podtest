@@ -2,20 +2,34 @@ package podtest_mysql
 
 import std.unittest.*
 import std.unittest.testmacro.*
+import podtest_core.{PresetContainer, RdbContainer}
+
+func expectMysqlContainerContract(container: PresetContainer) {
+    @Expect(container.isStarted)
+}
+
+func expectMysqlRdbContract(rdb: RdbContainer) {
+    @Expect(rdb.isStarted)
+    @Expect(rdb.username == "test")
+    @Expect(rdb.password == "test")
+    @Expect(rdb.database == "test")
+    @Expect(rdb.host == "localhost")
+    @Expect(rdb.portNum > 0)
+
+    let connStr = rdb.connectionString()
+    @Expect(connStr.contains("mysql://"))
+    @Expect(connStr.contains(":" + rdb.port))
+}
 
 @Test
 func testMysqlContainerDefaultImage() {
     let mysql = MysqlContainer()
     mysql.start()
-    @Expect(mysql.isStarted)
-    @Expect(mysql.username == "test")
-    @Expect(mysql.password == "test")
-    @Expect(mysql.database == "test")
-    @Expect(mysql.host == "localhost")
+    let base: PresetContainer = mysql
+    expectMysqlContainerContract(base)
 
-    let connStr = mysql.connectionString()
-    @Expect(connStr.contains("mysql://"))
-    @Expect(connStr.contains(":" + mysql.port))
+    let rdb: RdbContainer = mysql
+    expectMysqlRdbContract(rdb)
 
     mysql.stop()
     @Expect(!mysql.isStarted)

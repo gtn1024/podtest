@@ -1,11 +1,11 @@
 package podtest_mysql
 
-import std.core.{Duration, Resource}
+import std.core.Duration
 import std.collection.ArrayList
 import std.convert.Parsable
 import podtest_core.*
 
-public class MysqlContainer <: Resource {
+public class MysqlContainer <: RdbContainer {
     private let _image: String
     private let _username: String
     private let _password: String

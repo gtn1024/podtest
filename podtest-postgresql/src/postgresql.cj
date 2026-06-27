@@ -1,11 +1,11 @@
 package podtest_postgresql
 
-import std.core.{Duration, Resource}
+import std.core.Duration
 import std.collection.ArrayList
 import std.convert.Parsable
 import podtest_core.*
 
-public class PostgresqlContainer <: Resource {
+public class PostgresqlContainer <: RdbContainer {
     private let _image: String
     private let _username: String
     private let _password: String
