@@ -15,7 +15,7 @@ func testPostgresqlContainerDefaultImage() {
 
     let connStr = pg.connectionString()
     @Expect(connStr.contains("postgresql://"))
-    @Expect(connStr.contains(":5432"))
+    @Expect(connStr.contains(":" + pg.port))
 
     pg.stop()
     @Expect(!pg.isStarted)

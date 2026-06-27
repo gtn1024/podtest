@@ -13,6 +13,7 @@ public enum PodTestError <: ToString {
     | PortMappingFailed(String)
     | WaitTimeout(String)
     | ConfigError(String)
+    | InspectFailed(String)
     | CliError(String, Int64)
 
     public func toString(): String {
@@ -26,6 +27,7 @@ public enum PodTestError <: ToString {
             case PortMappingFailed(msg) => "PortMappingFailed: ${msg}"
             case WaitTimeout(msg) => "WaitTimeout: ${msg}"
             case ConfigError(msg) => "ConfigError: ${msg}"
+            case InspectFailed(msg) => "InspectFailed: ${msg}"
             case CliError(msg, code) => "CliError: ${msg} (exit code: ${code})"
         }
     }

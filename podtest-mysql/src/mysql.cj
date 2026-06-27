@@ -34,7 +34,7 @@ public class MysqlContainer <: Resource {
         ))
 
         this.container = GenericContainer(image)
-            .exposedPorts(["3306:3306"])
+            .exposedPorts(["3306"])
             .env("MYSQL_ROOT_PASSWORD", password)
             .env("MYSQL_USER", username)
             .env("MYSQL_PASSWORD", password)

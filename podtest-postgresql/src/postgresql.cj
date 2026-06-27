@@ -34,7 +34,7 @@ public class PostgresqlContainer <: Resource {
         ))
 
         this.container = GenericContainer(image)
-            .exposedPorts(["5432:5432"])
+            .exposedPorts(["5432"])
             .env("POSTGRES_USER", username)
             .env("POSTGRES_PASSWORD", password)
             .env("POSTGRES_DB", database)

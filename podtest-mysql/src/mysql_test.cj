@@ -15,7 +15,7 @@ func testMysqlContainerDefaultImage() {
 
     let connStr = mysql.connectionString()
     @Expect(connStr.contains("mysql://"))
-    @Expect(connStr.contains(":3306"))
+    @Expect(connStr.contains(":" + mysql.port))
 
     mysql.stop()
     @Expect(!mysql.isStarted)

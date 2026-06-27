@@ -113,24 +113,32 @@ public class ContainerClient {
     }
 
     public func containerLogs(containerId: String): String {
-        run(["logs", containerId])
+        let (exitCode, stdout, stderr) = runIgnoreError(["logs", containerId])
+        if (exitCode != 0) {
+            throw PodTestException(PodTestError.CliError(stderr, exitCode))
+        }
+        return stdout + stderr
     }
 
     public func mappedPort(containerId: String, port: String): ?String {
-        let (_, stdout, _) = runIgnoreError(["port", containerId, port])
-        let trimmed = stdout.trimAscii()
-        if (trimmed.isEmpty()) {
-            return None
+        if (let Some(binding) <- portBinding(containerId, port)) {
+            return Some(binding.hostPort)
         }
-        let parts = trimmed.split(":")
-        if (parts.size >= 2) {
-            return parts[parts.size - 1]
-        }
-        return Some(trimmed)
+        return None
     }
 
-    public func inspectContainer(containerId: String): String {
-        run(["inspect", containerId])
+    /// 按 containerPort（如 "80" 或 "80/tcp"）取结构化端口绑定（含 HostIp）。
+    /// 当前依赖 docker 的 NetworkSettings.Ports 结构。
+    public func portBinding(containerId: String, port: String): ?PortBinding {
+        let info = inspectContainer(containerId)
+        return info.portBinding(port)
+    }
+
+    /// 解析 `docker inspect <id>` 输出为结构化的 `ContainerInfo`。
+    /// 当前只保证 docker 的 schema；解析失败抛 `PodTestError.InspectFailed`。
+    public func inspectContainer(containerId: String): ContainerInfo {
+        let raw = run(["inspect", containerId])
+        return ContainerInfo.fromInspectJson(raw)
     }
 
     public func containerExists(containerId: String): Bool {
