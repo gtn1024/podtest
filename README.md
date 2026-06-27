@@ -11,6 +11,7 @@ PodTest provides a clean API to manage Docker/Podman containers in your test sui
 - **Docker & Podman** auto-detection via CLI
 - **Fluent builder API** for container configuration
 - **Wait strategies**: TCP port, log pattern, composite
+- **Container exec**: run commands inside started containers
 - **Resource interface**: `try-with` auto-cleanup
 - **Test suite lifecycle** management with `PodTestSuite`
 - **Database modules**: PostgreSQL, MySQL
@@ -71,6 +72,21 @@ func testWithAutoCleanup() {
         // container auto-closed when leaving scope
     }
 }
+```
+
+Run commands inside a started container:
+
+```cangjie
+let container = GenericContainer("docker.io/library/alpine:latest")
+    .extraArgs(["sleep", "60"])
+container.start()
+
+let result = container.exec(["sh", "-c", "printf hello"])
+if (result.success) {
+    // result.stdout == "hello"
+}
+
+container.stop()
 ```
 
 ### PostgreSQL

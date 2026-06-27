@@ -11,6 +11,7 @@ PodTest 提供简洁的 API 来管理测试套件中的 Docker/Podman 容器 —
 - **Docker & Podman** 自动检测，CLI 优先
 - **链式构建器 API** 配置容器
 - **等待策略**：TCP 端口、日志模式、组合策略
+- **容器内执行命令**：在已启动容器里运行命令并获取输出
 - **Resource 接口**：`try-with` 自动清理
 - **测试套件生命周期** 管理（`PodTestSuite`）
 - **数据库模块**：PostgreSQL、MySQL
@@ -71,6 +72,21 @@ func testWithAutoCleanup() {
         // 离开作用域时自动清理容器
     }
 }
+```
+
+在已启动容器里执行命令：
+
+```cangjie
+let container = GenericContainer("docker.io/library/alpine:latest")
+    .extraArgs(["sleep", "60"])
+container.start()
+
+let result = container.exec(["sh", "-c", "printf hello"])
+if (result.success) {
+    // result.stdout == "hello"
+}
+
+container.stop()
 ```
 
 ### PostgreSQL

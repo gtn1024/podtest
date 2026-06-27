@@ -3,6 +3,22 @@ package podtest_core
 import std.process.{execute, executeWithOutput, ProcessRedirect}
 import std.collection.{ArrayList, HashMap}
 
+public class ExecResult {
+    public let exitCode: Int64
+    public let stdout: String
+    public let stderr: String
+
+    public init(exitCode!: Int64, stdout!: String, stderr!: String) {
+        this.exitCode = exitCode
+        this.stdout = stdout
+        this.stderr = stderr
+    }
+
+    public prop success: Bool {
+        get() { exitCode == 0 }
+    }
+}
+
 public class ContainerClient {
     private let _config: PodTestConfig
     private let engineCmd: String
@@ -129,6 +145,22 @@ public class ContainerClient {
             throw PodTestException(PodTestError.CliError(stderr, exitCode))
         }
         return stdout + stderr
+    }
+
+    public func execContainer(containerId: String, command: Array<String>): ExecResult {
+        if (command.size == 0) {
+            throw PodTestException(PodTestError.ConfigError("exec command cannot be empty"))
+        }
+
+        let args = ArrayList<String>()
+        args.add("exec")
+        args.add(containerId)
+        for (item in command) {
+            args.add(item)
+        }
+
+        let (exitCode, stdout, stderr) = runIgnoreError(args.toArray())
+        return ExecResult(exitCode: exitCode, stdout: stdout, stderr: stderr)
     }
 
     public func mappedPort(containerId: String, port: String): ?String {

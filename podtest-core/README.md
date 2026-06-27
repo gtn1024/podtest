@@ -51,8 +51,11 @@ let container = GenericContainer("nginx:alpine")
 container.start()
 let port = container.mappedPort("80")
 let logs = container.logs()
+let result = container.exec(["sh", "-c", "printf hello"])
 container.stop()
 ```
+
+`exec` returns an `ExecResult` with `exitCode`, `stdout`, `stderr`, and `success`. Non-zero command exits are returned instead of thrown.
 
 Auto-cleanup with `try-with` (implements `Resource`):
 
@@ -106,6 +109,7 @@ client.removeContainer(id, force: true)
 client.containerExists(id)
 client.mappedPort(id, "80")
 client.containerLogs(id)
+client.execContainer(id, ["sh", "-c", "printf hello"])
 ```
 
 ### PodTestConfig

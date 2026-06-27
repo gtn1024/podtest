@@ -54,3 +54,63 @@ func testGenericContainerClose() {
     container.close()
     @Expect(container.isClosed())
 }
+
+@Test
+func testGenericContainerExecSuccess() {
+    try (container = GenericContainer("docker.io/library/alpine:latest").extraArgs(["sleep", "60"])) {
+        container.start()
+        let result = container.exec(["sh", "-c", "printf podtest-container-exec"])
+        @Expect(result.success)
+        @Expect(result.exitCode == 0)
+        @Expect(result.stdout == "podtest-container-exec")
+        @Expect(result.stderr == "")
+    }
+}
+
+@Test
+func testGenericContainerExecNonZeroExit() {
+    try (container = GenericContainer("docker.io/library/alpine:latest").extraArgs(["sleep", "60"])) {
+        container.start()
+        let result = container.exec(["sh", "-c", "printf failed >&2; exit 7"])
+        @Expect(!result.success)
+        @Expect(result.exitCode == 7)
+        @Expect(result.stdout == "")
+        @Expect(result.stderr == "failed")
+    }
+}
+
+@Test
+func testGenericContainerExecEmptyCommand() {
+    try (container = GenericContainer("docker.io/library/alpine:latest").extraArgs(["sleep", "60"])) {
+        container.start()
+        var caught: ?PodTestError = None
+        try {
+            container.exec([])
+        } catch (e: PodTestException) {
+            caught = Some(e.error)
+        }
+
+        @Expect(caught.isSome())
+        @Expect(match (caught.getOrThrow()) {
+            case ConfigError(_) => true
+            case _ => false
+        })
+    }
+}
+
+@Test
+func testGenericContainerExecBeforeStart() {
+    let container = GenericContainer("docker.io/library/alpine:latest")
+    var caught: ?PodTestError = None
+    try {
+        container.exec(["sh", "-c", "printf should-not-run"])
+    } catch (e: PodTestException) {
+        caught = Some(e.error)
+    }
+
+    @Expect(caught.isSome())
+    @Expect(match (caught.getOrThrow()) {
+        case ContainerNotFound(_) => true
+        case _ => false
+    })
+}

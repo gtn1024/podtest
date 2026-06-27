@@ -151,6 +151,15 @@ public class GenericContainer <: Resource {
         throw PodTestException(PodTestError.ContainerNotFound("Container not started"))
     }
 
+    public func exec(command: Array<String>): ExecResult {
+        if (let Some(id) <- containerId) {
+            if (started) {
+                return client.execContainer(id, command)
+            }
+        }
+        throw PodTestException(PodTestError.ContainerNotFound("Container not started"))
+    }
+
     public prop isStarted: Bool {
         get() { started }
     }

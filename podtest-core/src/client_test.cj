@@ -51,3 +51,68 @@ func testContainerClientMappedPort() {
     client.stopContainer(id)
     client.removeContainer(id, force: true)
 }
+
+@Test
+func testContainerClientExecSuccess() {
+    let config = PodTestConfig()
+    let client = ContainerClient(config: config)
+    client.removeContainer("podtest-unit-exec-success-test", force: true)
+
+    let id = client.createContainer(
+        "docker.io/library/alpine:latest",
+        name: "podtest-unit-exec-success-test",
+        extraArgs: ["sleep", "60"]
+    )
+    client.startContainer(id)
+
+    let result = client.execContainer(id, ["sh", "-c", "printf podtest-exec"])
+    @Expect(result.success)
+    @Expect(result.exitCode == 0)
+    @Expect(result.stdout == "podtest-exec")
+    @Expect(result.stderr == "")
+
+    client.stopContainer(id)
+    client.removeContainer(id, force: true)
+}
+
+@Test
+func testContainerClientExecNonZeroExit() {
+    let config = PodTestConfig()
+    let client = ContainerClient(config: config)
+    client.removeContainer("podtest-unit-exec-nonzero-test", force: true)
+
+    let id = client.createContainer(
+        "docker.io/library/alpine:latest",
+        name: "podtest-unit-exec-nonzero-test",
+        extraArgs: ["sleep", "60"]
+    )
+    client.startContainer(id)
+
+    let result = client.execContainer(id, ["sh", "-c", "printf failed >&2; exit 7"])
+    @Expect(!result.success)
+    @Expect(result.exitCode == 7)
+    @Expect(result.stdout == "")
+    @Expect(result.stderr == "failed")
+
+    client.stopContainer(id)
+    client.removeContainer(id, force: true)
+}
+
+@Test
+func testContainerClientExecEmptyCommand() {
+    let config = PodTestConfig()
+    let client = ContainerClient(config: config)
+
+    var caught: ?PodTestError = None
+    try {
+        client.execContainer("podtest-no-container", [])
+    } catch (e: PodTestException) {
+        caught = Some(e.error)
+    }
+
+    @Expect(caught.isSome())
+    @Expect(match (caught.getOrThrow()) {
+        case ConfigError(_) => true
+        case _ => false
+    })
+}
