@@ -3,6 +3,7 @@ package podtest_core
 import std.process.{executeWithOutput, ProcessRedirect}
 import std.core.Duration
 import std.deriving.*
+import std.env.getVariable
 
 @Derive[Equatable]
 public enum ContainerEngine {
@@ -38,9 +39,25 @@ public class PodTestConfig {
         if (let Some(e) <- this.engine) {
             return e
         }
+        if (let Some(envEngine) <- getVariable("PODTEST_ENGINE")) {
+            let detected = PodTestConfig.parseEngine(envEngine)
+            this.engine = detected
+            return detected
+        }
         let detected = PodTestConfig.detectEngineFromSystem()
         this.engine = detected
         return detected
+    }
+
+    public static func parseEngine(engine: String): ContainerEngine {
+        let normalized = engine.trimAscii().toAsciiLower()
+        match (normalized) {
+            case "docker" => return ContainerEngine.Docker
+            case "podman" => return ContainerEngine.Podman
+            case _ => throw PodTestException(PodTestError.ConfigError(
+                "PODTEST_ENGINE must be 'docker' or 'podman', got '${engine}'"
+            ))
+        }
     }
 
     public static func detectEngineFromSystem(): ContainerEngine {

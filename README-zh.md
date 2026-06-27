@@ -51,7 +51,7 @@ import podtest_core.*
 
 @Test
 func testWithNginx() {
-    let container = GenericContainer("nginx:alpine")
+    let container = GenericContainer("docker.io/library/nginx:alpine")
         .exposedPorts(["8080:80"])
         .withWaitStrategy(TcpWait(port: "80", timeout: Duration.second * 30))
 
@@ -66,7 +66,7 @@ func testWithNginx() {
 ```cangjie
 @Test
 func testWithAutoCleanup() {
-    try (container = GenericContainer("nginx:alpine").exposedPorts(["8080:80"])) {
+    try (container = GenericContainer("docker.io/library/nginx:alpine").exposedPorts(["8080:80"])) {
         container.start()
         // 离开作用域时自动清理容器
     }
@@ -160,8 +160,17 @@ config.host = "127.0.0.1"
 config.defaultPullPolicy = ImagePullPolicy.Always
 config.removeOnExit = true
 
-let container = GenericContainer("alpine:latest", config: config)
+let container = GenericContainer("docker.io/library/alpine:latest", config: config)
 ```
+
+设置 `PODTEST_ENGINE` 可以跳过自动检测，强制选择容器引擎：
+
+```bash
+PODTEST_ENGINE=podman cjpm test
+PODTEST_ENGINE=docker cjpm test
+```
+
+使用 Podman 时建议使用 `docker.io/library/nginx:alpine` 这类全限定镜像名，因为很多 Podman 安装没有配置短镜像名搜索仓库。
 
 | 选项 | 默认值 | 说明 |
 |------|--------|------|

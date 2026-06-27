@@ -14,7 +14,7 @@ public class MysqlContainer <: Resource {
     private let container: GenericContainer
 
     public init(
-        image!: String = "mysql:9.7",
+        image!: String = "docker.io/library/mysql:9.7",
         username!: String = "test",
         password!: String = "test",
         database!: String = "test",

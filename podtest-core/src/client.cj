@@ -1,6 +1,6 @@
 package podtest_core
 
-import std.process.{executeWithOutput, ProcessRedirect}
+import std.process.{execute, executeWithOutput, ProcessRedirect}
 import std.collection.{ArrayList, HashMap}
 
 public class ContainerClient {
@@ -95,7 +95,18 @@ public class ContainerClient {
     }
 
     public func startContainer(containerId: String): Unit {
-        run(["start", containerId])
+        // Podman can keep captured pipes open through the started container; discard output and wait only for the CLI exit code.
+        let exitCode = execute(
+            engineCmd,
+            ["start", containerId],
+            stdOut: ProcessRedirect.Discard,
+            stdErr: ProcessRedirect.Discard
+        )
+        if (exitCode != 0) {
+            throw PodTestException(PodTestError.ContainerStartFailed(
+                "Failed to start container ${containerId} (exit code: ${exitCode})"
+            ))
+        }
     }
 
     public func stopContainer(containerId: String, timeout!: Int64 = 10): Unit {

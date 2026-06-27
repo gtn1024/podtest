@@ -25,6 +25,13 @@ func testPodTestConfigCustomValues() {
 }
 
 @Test
+func testPodTestConfigParseEngine() {
+    @Expect(PodTestConfig.parseEngine("docker") == ContainerEngine.Docker)
+    @Expect(PodTestConfig.parseEngine("DOCKER") == ContainerEngine.Docker)
+    @Expect(PodTestConfig.parseEngine(" podman ") == ContainerEngine.Podman)
+}
+
+@Test
 func testDockerEngineDetection() {
     let config = PodTestConfig()
     let engine = config.detectEngine()

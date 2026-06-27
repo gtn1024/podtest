@@ -14,8 +14,8 @@ func testContainerClientIsRunning() {
 func testContainerClientPullImage() {
     let config = PodTestConfig()
     let client = ContainerClient(config: config)
-    client.pullImage("alpine:latest")
-    @Expect(client.imageExists("alpine:latest"))
+    client.pullImage("docker.io/library/alpine:latest")
+    @Expect(client.imageExists("docker.io/library/alpine:latest"))
 }
 
 @Test
@@ -23,7 +23,7 @@ func testContainerClientCreateStartStopRemove() {
     let config = PodTestConfig()
     let client = ContainerClient(config: config)
 
-    let id = client.createContainer("alpine:latest", name: "podtest-unit-create-test")
+    let id = client.createContainer("docker.io/library/alpine:latest", name: "podtest-unit-create-test")
     @Expect(!id.isEmpty())
 
     client.startContainer(id)
@@ -39,7 +39,7 @@ func testContainerClientMappedPort() {
     let client = ContainerClient(config: config)
 
     let id = client.createContainer(
-        "nginx:alpine",
+        "docker.io/library/nginx:alpine",
         name: "podtest-unit-port-test",
         exposedPorts: ["8080:80"]
     )

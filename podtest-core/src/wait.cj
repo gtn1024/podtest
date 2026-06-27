@@ -58,7 +58,7 @@ public class LogWait <: WaitStrategy {
         this.interval = interval
     }
 
-    public func waitUntilReady(client: ContainerClient, containerId: String, host: String): Unit {
+    public func waitUntilReady(client: ContainerClient, containerId: String, _: String): Unit {
         let start = DateTime.now()
         while (DateTime.now() - start < timeout) {
             try {

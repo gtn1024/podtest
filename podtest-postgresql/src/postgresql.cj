@@ -14,7 +14,7 @@ public class PostgresqlContainer <: Resource {
     private let container: GenericContainer
 
     public init(
-        image!: String = "postgres:18-alpine",
+        image!: String = "docker.io/library/postgres:18-alpine",
         username!: String = "test",
         password!: String = "test",
         database!: String = "test",

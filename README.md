@@ -51,7 +51,7 @@ import podtest_core.*
 
 @Test
 func testWithNginx() {
-    let container = GenericContainer("nginx:alpine")
+    let container = GenericContainer("docker.io/library/nginx:alpine")
         .exposedPorts(["8080:80"])
         .withWaitStrategy(TcpWait(port: "80", timeout: Duration.second * 30))
 
@@ -66,7 +66,7 @@ Auto-cleanup with `try-with`:
 ```cangjie
 @Test
 func testWithAutoCleanup() {
-    try (container = GenericContainer("nginx:alpine").exposedPorts(["8080:80"])) {
+    try (container = GenericContainer("docker.io/library/nginx:alpine").exposedPorts(["8080:80"])) {
         container.start()
         // container auto-closed when leaving scope
     }
@@ -160,8 +160,17 @@ config.host = "127.0.0.1"
 config.defaultPullPolicy = ImagePullPolicy.Always
 config.removeOnExit = true
 
-let container = GenericContainer("alpine:latest", config: config)
+let container = GenericContainer("docker.io/library/alpine:latest", config: config)
 ```
+
+Set `PODTEST_ENGINE` to force an engine instead of auto-detection:
+
+```bash
+PODTEST_ENGINE=podman cjpm test
+PODTEST_ENGINE=docker cjpm test
+```
+
+When using Podman, prefer fully qualified image names such as `docker.io/library/nginx:alpine`, because many Podman installations do not define unqualified search registries.
 
 | Option | Default | Description |
 |--------|---------|-------------|

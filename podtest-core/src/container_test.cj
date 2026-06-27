@@ -6,7 +6,7 @@ import std.core.Duration
 
 @Test
 func testGenericContainerStartStop() {
-    let container = GenericContainer("alpine:latest")
+    let container = GenericContainer("docker.io/library/alpine:latest")
     container.start()
     @Expect(container.isStarted)
 
@@ -16,7 +16,7 @@ func testGenericContainerStartStop() {
 
 @Test
 func testGenericContainerWithEnv() {
-    let container = GenericContainer("alpine:latest")
+    let container = GenericContainer("docker.io/library/alpine:latest")
         .env("PODTEST_TEST", "hello")
     container.start()
 
@@ -25,7 +25,7 @@ func testGenericContainerWithEnv() {
 
 @Test
 func testGenericContainerBuilderChaining() {
-    let container = GenericContainer("alpine:latest")
+    let container = GenericContainer("docker.io/library/alpine:latest")
         .exposedPorts(["8080:80"])
         .env("KEY", "value")
         .volume("/tmp", "/tmp")
@@ -37,7 +37,7 @@ func testGenericContainerBuilderChaining() {
 @Test
 func testGenericContainerResourceAutoClose() {
     var closed = false
-    try (container = GenericContainer("alpine:latest")) {
+    try (container = GenericContainer("docker.io/library/alpine:latest")) {
         container.start()
         @Expect(container.isStarted)
         @Expect(!container.isClosed())
@@ -48,7 +48,7 @@ func testGenericContainerResourceAutoClose() {
 
 @Test
 func testGenericContainerClose() {
-    let container = GenericContainer("alpine:latest")
+    let container = GenericContainer("docker.io/library/alpine:latest")
     container.start()
     @Expect(!container.isClosed())
     container.close()

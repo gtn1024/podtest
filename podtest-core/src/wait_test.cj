@@ -6,7 +6,7 @@ import std.core.Duration
 
 @Test
 func testWaitStrategyLogWait() {
-    let container = GenericContainer("alpine:latest")
+    let container = GenericContainer("docker.io/library/alpine:latest")
         .extraArgs(["sh", "-c", "echo READY && sleep 60"])
         .withWaitStrategy(LogWait(pattern: "READY", timeout: Duration.second * 10))
 
