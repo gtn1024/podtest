@@ -15,6 +15,7 @@ public enum PodTestError <: ToString {
     | ConfigError(String)
     | InspectFailed(String)
     | InitSqlFailed(String)
+    | InitCommandFailed(String)
     | CliError(String, Int64)
 
     public func toString(): String {
@@ -30,6 +31,7 @@ public enum PodTestError <: ToString {
             case ConfigError(msg) => "ConfigError: ${msg}"
             case InspectFailed(msg) => "InspectFailed: ${msg}"
             case InitSqlFailed(msg) => "InitSqlFailed: ${msg}"
+            case InitCommandFailed(msg) => "InitCommandFailed: ${msg}"
             case CliError(msg, code) => "CliError: ${msg} (exit code: ${code})"
         }
     }

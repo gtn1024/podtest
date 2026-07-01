@@ -14,7 +14,7 @@ PodTest provides a clean API to manage Docker/Podman containers in your test sui
 - **Container exec**: run commands inside started containers
 - **Resource interface**: `try-with` auto-cleanup
 - **Test suite lifecycle** management with `PodTestSuite`
-- **Database modules**: PostgreSQL, MySQL
+- **Database modules**: PostgreSQL, MySQL, Redis
 
 ## Quick Start
 
@@ -144,6 +144,37 @@ func testWithMysql() {
 ```
 
 `withInitSql` queues inline SQL statements before `start()`. Statements run in order after the database client is ready; a failing statement aborts `start()` with `InitSqlFailed` and cleans up the container.
+
+### Redis
+
+```cangjie
+package mytest
+
+import std.unittest.*
+import std.unittest.testmacro.*
+import podtest_redis.*
+
+@Test
+func testWithRedis() {
+    let redis = RedisContainer()
+        .withInitCommand("SET items:1 seed")
+    redis.start()
+
+    let connStr = redis.connectionString()
+    // redis://localhost:PORT/0
+
+    redis.stop()
+}
+```
+
+With a password:
+
+```cangjie
+let redis = RedisContainer(password: "secret")
+// redis://:secret@localhost:PORT/0
+```
+
+`withInitCommand` queues inline Redis commands (run via `redis-cli`) before `start()` returns. Commands run in order after the server is ready; a failing command aborts `start()` with `InitCommandFailed` and cleans up the container.
 
 ### Wait Strategies
 

@@ -14,7 +14,7 @@ PodTest 提供简洁的 API 来管理测试套件中的 Docker/Podman 容器 —
 - **容器内执行命令**：在已启动容器里运行命令并获取输出
 - **Resource 接口**：`try-with` 自动清理
 - **测试套件生命周期** 管理（`PodTestSuite`）
-- **数据库模块**：PostgreSQL、MySQL
+- **数据库模块**：PostgreSQL、MySQL、Redis
 
 ## 快速开始
 
@@ -39,6 +39,7 @@ PodTest 提供简洁的 API 来管理测试套件中的 Docker/Podman 容器 —
   podtest_core = "0.1.0"
   podtest_postgresql = "0.1.0"
   podtest_mysql = "0.1.0"
+  podtest_redis = "0.1.0"
 ```
 
 ### 基本用法
@@ -138,6 +139,37 @@ func testWithMysql() {
     mysql.stop()
 }
 ```
+
+### Redis
+
+```cangjie
+package mytest
+
+import std.unittest.*
+import std.unittest.testmacro.*
+import podtest_redis.*
+
+@Test
+func testWithRedis() {
+    let redis = RedisContainer()
+        .withInitCommand("SET items:1 seed")
+    redis.start()
+
+    let connStr = redis.connectionString()
+    // redis://localhost:PORT/0
+
+    redis.stop()
+}
+```
+
+带密码：
+
+```cangjie
+let redis = RedisContainer(password: "secret")
+// redis://:secret@localhost:PORT/0
+```
+
+`withInitCommand` 在 `start()` 返回前依次执行通过 `redis-cli` 运行的内联命令；某条命令失败会以 `InitCommandFailed` 中止 `start()` 并清理容器。
 
 ### 等待策略
 
