@@ -169,10 +169,16 @@ public class MysqlContainer <: RdbInitSqlContainer<MysqlContainer> {
     }
 
     private func execSql(sql: String): ExecResult {
-        // MYSQL_USER is not guaranteed to authenticate over the local socket; root is the reliable init account.
+        // 强制走 TCP 而非默认的 Unix socket：rootless podman 下 mysqld.sock 路径不稳定，
+        // mysql 客户端默认连 /var/run/mysqld/mysqld.sock 会报 ERROR 2002。
+        // 容器内回环 127.0.0.1 直连容器监听的 3306，绕开宿主端口映射与 socket 文件差异。
+        // root 密码即 MYSQL_ROOT_PASSWORD，root 是可靠的 init 账户。
         container.exec(
             [
                 "mysql",
+                "--protocol=TCP",
+                "-h127.0.0.1",
+                "-P3306",
                 "-uroot",
                 "-p${_password}",
                 _database,
