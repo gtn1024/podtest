@@ -14,7 +14,7 @@ PodTest provides a clean API to manage Docker/Podman containers in your test sui
 - **Container exec**: run commands inside started containers
 - **Resource interface**: `try-with` auto-cleanup
 - **Test suite lifecycle** management with `PodTestSuite`
-- **Database modules**: PostgreSQL, MySQL, Redis
+- **Preset modules**: PostgreSQL, MySQL, Redis, MongoDB, MinIO, Redpanda
 
 ## Quick Start
 
@@ -30,15 +30,21 @@ Add PodTest as a dependency in your `cjpm.toml`:
 ```toml
 [dependencies]
   podtest_core = "0.1.0"
+  podtest_postgresql = "0.1.0"
+  podtest_mysql = "0.1.0"
 ```
 
-For database modules:
+Redis, MongoDB, MinIO and Redpanda are not yet published to the central repository. Reference them from a local checkout until a compatible version is released:
 
 ```toml
 [dependencies]
   podtest_core = "0.1.0"
   podtest_postgresql = "0.1.0"
   podtest_mysql = "0.1.0"
+  podtest_redis = { path = "path/to/podtest/podtest-redis" }
+  podtest_mongodb = { path = "path/to/podtest/podtest-mongodb" }
+  podtest_minio = { path = "path/to/podtest/podtest-minio" }
+  podtest_redpanda = { path = "path/to/podtest/podtest-redpanda" }
 ```
 
 ### Basic Usage
@@ -175,6 +181,56 @@ let redis = RedisContainer(password: "secret")
 ```
 
 `withInitCommand` queues inline Redis commands (run via `redis-cli`) before `start()` returns. Commands run in order after the server is ready; a failing command aborts `start()` with `InitCommandFailed` and cleans up the container.
+
+### MongoDB
+
+```cangjie
+import podtest_mongodb.*
+
+@Test
+func testWithMongo() {
+    let mongo = MongodbContainer()
+        .withInitCommand("db.getSiblingDB('mydb').createCollection('items')")
+        .withInitCommand("db.getSiblingDB('mydb').items.insertOne({id: 1, name: 'seed'})")
+    mongo.start()
+
+    // mongodb://test:test@localhost:PORT/admin
+    // connect to an app db with ?authSource=admin
+    mongo.stop()
+}
+```
+
+### MinIO
+
+```cangjie
+import podtest_minio.*
+
+@Test
+func testWithMinio() {
+    let minio = MinioContainer()
+        .withInitCommand("mb local/mybucket")
+    minio.start()
+
+    // endpoint: http://localhost:PORT
+    minio.stop()
+}
+```
+
+### Redpanda
+
+```cangjie
+import podtest_redpanda.*
+
+@Test
+func testWithRedpanda() {
+    let rp = RedpandaContainer()
+        .withInitCommand("topic create orders -p 3")
+    rp.start()
+
+    // bootstrapServers(): localhost:PORT  (Kafka client)
+    rp.stop()
+}
+```
 
 ### Wait Strategies
 

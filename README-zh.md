@@ -14,7 +14,7 @@ PodTest 提供简洁的 API 来管理测试套件中的 Docker/Podman 容器 —
 - **容器内执行命令**：在已启动容器里运行命令并获取输出
 - **Resource 接口**：`try-with` 自动清理
 - **测试套件生命周期** 管理（`PodTestSuite`）
-- **数据库模块**：PostgreSQL、MySQL、Redis
+- **预设模块**：PostgreSQL、MySQL、Redis、MongoDB、MinIO、Redpanda
 
 ## 快速开始
 
@@ -30,16 +30,21 @@ PodTest 提供简洁的 API 来管理测试套件中的 Docker/Podman 容器 —
 ```toml
 [dependencies]
   podtest_core = "0.1.0"
+  podtest_postgresql = "0.1.0"
+  podtest_mysql = "0.1.0"
 ```
 
-使用数据库模块：
+Redis、MongoDB、MinIO、Redpanda 尚未发布到中心仓库，在兼容版本发布前请从本地检出引用：
 
 ```toml
 [dependencies]
   podtest_core = "0.1.0"
   podtest_postgresql = "0.1.0"
   podtest_mysql = "0.1.0"
-  podtest_redis = "0.1.0"
+  podtest_redis = { path = "path/to/podtest/podtest-redis" }
+  podtest_mongodb = { path = "path/to/podtest/podtest-mongodb" }
+  podtest_minio = { path = "path/to/podtest/podtest-minio" }
+  podtest_redpanda = { path = "path/to/podtest/podtest-redpanda" }
 ```
 
 ### 基本用法
@@ -170,6 +175,56 @@ let redis = RedisContainer(password: "secret")
 ```
 
 `withInitCommand` 在 `start()` 返回前依次执行通过 `redis-cli` 运行的内联命令；某条命令失败会以 `InitCommandFailed` 中止 `start()` 并清理容器。
+
+### MongoDB
+
+```cangjie
+import podtest_mongodb.*
+
+@Test
+func testWithMongo() {
+    let mongo = MongodbContainer()
+        .withInitCommand("db.getSiblingDB('mydb').createCollection('items')")
+        .withInitCommand("db.getSiblingDB('mydb').items.insertOne({id: 1, name: 'seed'})")
+    mongo.start()
+
+    // mongodb://test:test@localhost:PORT/admin
+    // 连接业务库需追加 ?authSource=admin
+    mongo.stop()
+}
+```
+
+### MinIO
+
+```cangjie
+import podtest_minio.*
+
+@Test
+func testWithMinio() {
+    let minio = MinioContainer()
+        .withInitCommand("mb local/mybucket")
+    minio.start()
+
+    // endpoint(): http://localhost:PORT
+    minio.stop()
+}
+```
+
+### Redpanda
+
+```cangjie
+import podtest_redpanda.*
+
+@Test
+func testWithRedpanda() {
+    let rp = RedpandaContainer()
+        .withInitCommand("topic create orders -p 3")
+    rp.start()
+
+    // bootstrapServers(): localhost:PORT（Kafka 客户端）
+    rp.stop()
+}
+```
 
 ### 等待策略
 
