@@ -1,4 +1,4 @@
 [workspace]
-  members = ["podtest-core", "podtest-postgresql", "podtest-mysql", "podtest-redis"]
-  build-members = ["podtest-core", "podtest-postgresql", "podtest-mysql", "podtest-redis"]
+  members = ["podtest-core", "podtest-postgresql", "podtest-mysql", "podtest-redis", "podtest-mongodb"]
+  build-members = ["podtest-core", "podtest-postgresql", "podtest-mysql", "podtest-redis", "podtest-mongodb"]
   test-members = []
