@@ -2,7 +2,7 @@
   cjc-version = "1.1.0"
   name = "podtest_redpanda"
   description = "PodTest Redpanda container module"
-  version = "0.1.0"
+  version = "0.1.1"
   compile-option = ""
   override-compile-option = ""
   link-option = "-lstdx.encoding.jsonFFI"
