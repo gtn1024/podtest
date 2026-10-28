@@ -18,4 +18,4 @@
   tag = ["testing", "docker", "container", "podman"]
 
 [dependencies]
-  stdx = { git = "https://github.com/gtn1024/cangjie_stdx", tag = "v1.1.0-fix" }
+  stdx = "1.1.0"
